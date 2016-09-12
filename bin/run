@@ -1,0 +1,59 @@
+#!/bin/sh
+
+export PATH=${PATH}:/.whaler/bin
+
+TTY=$(tty)
+DOCKER_OPTS="-t"
+if [ "not a tty" != "$TTY" ]; then
+    DOCKER_OPTS="-it"
+fi
+
+name="$1"
+if [ ! -z "$name" ]; then
+    APP=$(echo "$name" | cut -d"." -f2)
+    if [ -z "${APP}" ]; then
+        name="$name${WHALER_APP}";
+    fi
+
+    image=$(docker inspect -f '{{ .Image }}' $name)
+
+    if [ -n "$image" ]; then
+        cmd=""
+        count=0
+        for var in $@
+        do
+            count=$((count + 1))
+            if [ "$count" -gt 1 ]; then
+                cmd="$cmd $var"
+            fi
+        done
+
+        if [ -z "$cmd" ]; then
+            cmd="/bin/sh"
+        fi
+
+        envs=""
+        env=$(echo `docker inspect -f '{{ .Config.Env }}' $name` | sed -e 's/^\[//' -e 's/\]$//')
+        for var in $env
+        do
+           envs="$envs -e $var"
+        done
+
+        hosts=''
+        extra_hosts=$(echo `docker inspect -f '{{ .HostConfig.ExtraHosts }}' $name` | sed -e 's/^\[//' -e 's/\]$//')
+        for var in $extra_hosts
+        do
+            HOST=$(echo "$var" | cut -d"=" -f2)
+            if [ "None" != "$HOST" ]; then
+                hosts="$hosts --add-host $var"
+            fi
+        done
+
+        docker run $DOCKER_OPTS --rm --name $name"_bridge_pty_"$$ --volumes-from $name $envs $hosts $image $cmd
+    fi
+
+else
+    echo ""
+    echo "  Usage: run [ref] [cmd]"
+    echo ""
+fi
