@@ -10,12 +10,20 @@ $ docker create \
 --name bridge whaler/bridge
 ```
 
-### Get docker
+### Get bridge
 
 ```sh
 $ docker run -t --rm \
 --volumes-from bridge whaler/bridge \
-get-docker `docker version --format '{{.Server.Version}}'`
+get-bridge
+```
+
+OR
+
+```sh
+$ docker run -t --rm \
+--volumes-from bridge whaler/bridge \
+get-bridge `docker version --format '{{.Server.Version}}'`
 ```
 
 ## Usage
@@ -37,7 +45,7 @@ services:
 ### In service-a
 
 ```sh
-$ @whaler run service-b. [cmd]
+$ @whaler run service-b.$WHALER_APP [cmd]
 ```
 
 ## License

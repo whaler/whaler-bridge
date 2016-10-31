@@ -10,6 +10,6 @@ VOLUME ["/.whaler"]
 WORKDIR /.whaler
 
 ADD ./bin/ /.whaler/bridge
-ADD ./get-docker.sh /usr/local/bin/get-docker
+ADD ./get-bridge.sh /usr/local/bin/get-bridge
 
-CMD ["get-docker"]
+CMD ["get-bridge"]
