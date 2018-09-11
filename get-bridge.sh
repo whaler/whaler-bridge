@@ -1,13 +1,15 @@
 #!/bin/sh
 
-if [ ! -z "$1" ]; then
-    DOCKER_VERSION="$1"
-fi
-
 set -e
 
-: ${DOCKER_BUCKET:=get.docker.com}; export DOCKER_BUCKET
-: ${DOCKER_VERSION:=latest}; export DOCKER_VERSION
+if [ ! -z "$1" ]; then
+    DOCKER_VERSION="$1"
+else
+    DOCKER_VERSION=$(curl --silent --unix-socket /var/run/docker.sock -X GET http:/docker/info 2>&1 | jq -r '.ServerVersion')
+fi
+
+DOCKER_CHANNEL=${DOCKER_CHANNEL:=stable}
+DOCKER_BUCKET=${DOCKER_BUCKET:=download.docker.com}
 
 rm -rf /.whaler/bin
 mkdir -p /.whaler/bin
@@ -16,7 +18,7 @@ echo ""
 echo "Installing Docker ..."
 echo ""
 
-curl -fSL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-${DOCKER_VERSION}.tgz" -o docker.tgz
+curl -fSL "https://${DOCKER_BUCKET}/linux/static/${DOCKER_CHANNEL}/x86_64/docker-${DOCKER_VERSION}.tgz" -o docker.tgz
 tar -xzf docker.tgz
 mv docker/* /.whaler/bin/
 rmdir docker

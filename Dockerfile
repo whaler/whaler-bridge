@@ -1,8 +1,9 @@
-FROM alpine:3.4
-MAINTAINER Sergei Vizel <http://github.com/cravler>
+FROM alpine:3.8
+
+LABEL maintainer "Sergei Vizel <http://github.com/cravler>"
 
 RUN \
-    apk add --no-cache bash curl vim && \
+    apk add --no-cache bash curl vim jq && \
     rm -rf /var/cache/apk/* && \
     mkdir -p /.whaler/bridge
 
